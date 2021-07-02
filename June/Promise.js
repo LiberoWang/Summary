@@ -49,9 +49,9 @@ class Promise {
   }
 }
 
-
-
-// 完成版本
+/**
+ * Promise的完整版本,then方法返回一个promise函数 + resolvePromise函数实现
+ */
 
 class Promise {
   constructor(executor) {
@@ -189,48 +189,10 @@ function resolvePromise(promise2, x, resolve, reject) {
   }
 }
 
-// 例子
 
-// 1. 普通链式调用
-
-const p1 = new Promise(resolve => {
-  resolve(2);
-});
-
-p1.then(value => {
-  console.log(value); // 2
-
-}).then(value => {
-  console.log(value);
-});
-
-
-// 2. 循环引用
-const p1 = new Promise(resolve => {
-  resolve(2);
-});
-
-const p2 = p1.then(() => {
-  return p2;
-});
-
-
-// 3. 返回一个promise
-const p1 = new Promise(resolve => {
-  resolve(42);
-});
-
-const p2 = new Promise(resolve => {
-  resolve(43);
-});
-
-p1.then(value => {
-  console.log(value); // 42
-  return p2;
-}).then(value => {
-  console.log(value); // 43
-});
-
+/**
+ * Promise其他的API实现
+ */
 
 // Promise.resolve
 Promise.prototype.resolve = function(params) {
