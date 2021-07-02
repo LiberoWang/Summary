@@ -120,3 +120,44 @@ Function.prototype.myApply = function(context) {
   return result;
 }
 ```
+
+### 写一个校验值类型的
+
+```js
+Object.prototype.toString.call(1)
+"[object Number]"
+
+Object.prototype.toString.call(NaN);
+"[object Number]"
+
+Object.prototype.toString.call("1");
+"[object String]"
+
+Object.prototype.toString.call(true)
+"[object Boolean]"
+
+Object.prototype.toString.call(null)
+"[object Null]"
+
+Object.prototype.toString.call(undefined)
+"[object Undefined]"
+
+Object.prototype.toString.call(function a() {});
+"[object Function]"
+
+Object.prototype.toString.call([]);
+"[object Array]"
+
+Object.prototype.toString.call({});
+"[object Object]"
+```
+
+`call()`方法可以改变`this`的指向，那么把`Object.prototype.toString()`方法指向不同的数据类型上面，返回不同的结果.
+
+```js
+function instanceType(con) {
+  const s = Object.prototype.toString.call(con);
+  // s.match(/\[object (.*?)\]/) => ['[object Object]', 'Object']
+  return s.match(/\[object (.*?)\]/)[1].toLowerCase();
+}
+```
