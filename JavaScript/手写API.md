@@ -115,7 +115,7 @@ Function.prototype.myApply = function(context) {
   context[key] = this;
   const args = [...arguments].slice(1); // const args = arguments[1];
 
-  const result = context[key](args);
+  const result = context[key](...args);
   delete context[key];
   return result;
 }
