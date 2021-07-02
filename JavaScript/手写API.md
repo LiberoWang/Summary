@@ -56,7 +56,7 @@ Function.prototype.myBind = function(context) {
   if (typeof this !== 'function') return;
   const _this = this;
   context = context || window; // 没有传或者传null时默认指向window
-  const args = [...arguments.slice(1)]; // bind函数传入的参数
+  const args = [...arguments].slice(1); // bind函数传入的参数
 
   return function() {
     // 返回的匿名函数的arguments是bind返回的新函数调用时传入的参数
@@ -71,13 +71,32 @@ Function.prototype.myBind = function(context) {
 
 > 手动实现一个call函数
 
+// ES5
+```js
+Function.prototype.myCall = function(context) {
+  context = context || window;
+  var args = [];
+
+  for (var i = 1; i < arguments; i++) {
+    args.push('arguments[' + i + ']');
+  }
+
+  context.fn = this;
+  var result = eval('context.fn(' + args + ')');
+  delete result fn;
+  return result;
+}
+```
+
+// ES6
+`arguments`的扩展运算符
 ```js
 Function.prototype.myCall = function(context) {
   if (typeof this !== 'function') return;
   context = context || window;
   const key = Symbol(); // 保证内部的函数名时唯一的，不会覆盖window上的方法
   context[key] = this;
-  const args = [...arguments.slice(1)];
+  const args = [...arguments].slice(1);
   const result = context[key](...args); // 执行函数
   delete context[key];
   return result;
@@ -94,7 +113,7 @@ Function.prototype.myApply = function(context) {
   context = context || window;
   const key = Symbol();
   context[key] = this;
-  const args = [...arguments.slice(1)]; // const args = arguments[1];
+  const args = [...arguments].slice(1); // const args = arguments[1];
 
   const result = context[key](args);
   delete context[key];
