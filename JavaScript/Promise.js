@@ -301,7 +301,7 @@ Promise.prototype.all = function(promises) {
 ```
 
 ```
-Promise.race = function(promises) {
+Promise.prototype.race = function(promises) {
   return new Promise((resolve, reject) => {
     promises.forEach(promise => {
       Promise.resolve(promise).then(data => resolve(data)).catch((error) => reject(error))
@@ -313,7 +313,7 @@ Promise.race = function(promises) {
 ```
 Promise.allSettled()方法返回一个promise，该promise在所有给定的promise已被解析或被拒绝后解析，并且每个对象都描述每个promise的结果。
 ```
-Promise.allSettled = function(promises) {
+Promise.prototype.allSettled = function(promises) {
   const result = [];
   let count = 0;
   return new Promise(resolve => {
