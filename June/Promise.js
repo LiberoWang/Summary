@@ -214,7 +214,7 @@ Promise.prototype.resolve = function(params) {
 // 测试Promise.resole
 let p = Promise.resolve(20);
 p.then((data) => {
-  console.log(data);
+  console.log(data); // 20
 });
 
 let p2 = Promise.resolve({
@@ -222,16 +222,15 @@ let p2 = Promise.resolve({
     resolve(30);
   }
 });
-
 p2.then((data)=> {
-  console.log(data)
+  console.log(data); // 30
 });
 
 let p3 = Promise.resolve(new Promise((resolve) => {
-  resolve(400)
+  resolve(400);
 }));
 p3.then((data) => {
-  console.log(data);
+  console.log(data); // 400
 });
 
 
