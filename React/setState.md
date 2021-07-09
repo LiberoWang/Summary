@@ -11,6 +11,10 @@
 1. 由`React`控制的事件处理程序，以及生命周期内调用`setState`是异步更新`state`;
 2. `React`控制之外的事件中调用`setState`是同步更新`state`，比如原生js绑定事件、`setTimeout/setInrerval`等。
 
+**异步回调函数的都是同步更新的**
+
+**这是`React 18`之前的逻辑，在`React 18`的版本异步回调函数可以异步去更新.**
+
 
 `setState`本身并不是一个异步的方法，之所以会体现出一个异步的形式，是`React`框架本身的一种性能优化机制。因为每次调用`setState`都会触发更新，异步操作是为了提高性能，将多个状态合并一起更新，减少`re-render`调用。
 
@@ -43,7 +47,6 @@ componentDidMount() {
   this.setState({ count: count + 1 });
   this.setState({ count: count + 1 });
   this.setState({ count: count + 1 });
-
   // this.state.count = 0;
 }
 
@@ -59,6 +62,125 @@ Object.assign(
 ```
 
 ```js
+componentDidMount() {
+  // count: 0
+ setTimeout(() => {
+   this.setState({ count: this.state.count + 1 });
+   console.log(this.state.count);  // 1
+   
+   this.setState({ count: this.state.count + 1 });
+   console.log(this.state.count);  // 2
+ }, 0);
+}
+
+componentDidMount() {
+  // count: 0
+  load().then(() => {
+    this.setState({ count: this.state.count + 1 });
+    console.log(this.state.count);  // 1
+
+    this.setState({ count: this.state.count + 1 });
+    console.log(this.state.count);  // 2
+  });
+}
+
+function load() {
+  return Promise.resolve();
+}
+
+componentDidMount() {
+  this.setState({ count: this.state.count + 1 });
+  console.log("state 1: ", this.state.count);  // 0
+
+  this.setState({ count: this.state.count + 1 }, () => {
+    console.log("state 2: " + this.state.count); // 2
+  });
+
+  this.setState(prevState => {
+    console.log("state 3: " + prevState.count); // 1
+    return {  count: prevState.count + 1 };
+  }, () => {
+    console.log('state 4: '+ this.state.count);// 2
+  });
+}
+
+componentDidMount() {
+  this.setState({ count: this.state.count + 1 });
+  console.log("state 1: ", this.state.count);  // 0
+
+  this.setState({ count: this.state.count + 1 }, () => {
+    console.log("state 2: " + this.state.count); // 1
+  });
+
+  this.setState(prevState => {
+    console.log("state 3: " + prevState.count); // 1
+    return {  count: prevState.count + 1 };
+  }, () => {
+    console.log('state 4: '+ this.state.count); // 1
+  });
+
+  this.setState({ count: this.state.count + 1 });
+  console.log("state 5: ", this.state.count);  // 0
+
+  // 打印顺序：
+  // state 1: 0
+  // state 5: 0
+  // state 3: 1
+  // state 2: 1
+  // state 4: 1
+}
+
+componentDidMount() {
+  this.setState({ count: this.state.count + 1 });
+  console.log("state 1: ", this.state.count);  // 0
+
+  this.setState({ count: this.state.count + 3 }, () => {
+    console.log("state 2: " + this.state.count); // 4
+  });
+
+  this.setState(prevState => {
+    console.log("state 3: " + prevState.count); // 3
+    return {  count: prevState.count + 1 };
+  }, () => {
+    console.log('state 4: '+ this.state.count); // 4
+  });
+}
+
+componentDidMount() {
+  this.setState({ count: this.state.count + 3 });
+  console.log("state 1: ", this.state.count);  // 0
+
+  this.setState({ count: this.state.count + 1 }, () => {
+    console.log("state 2: " + this.state.count); // 2
+  });
+
+  this.setState(prevState => {
+    console.log("state 3: " + prevState.count); // 1
+    return {  count: prevState.count + 1 };
+  }, () => {
+    console.log('state 4: '+ this.state.count); // 2
+  });
+}
+
+componentDidMount() {
+  this.setState({ count: this.state.count + 1 });
+  console.log("state 1: ", this.state.count);  // 0
+
+  this.setState({ count: this.state.count + 3 }, () => {
+    console.log("state 2: " + this.state.count); // 4
+  });
+
+  this.setState(prevState => {
+    console.log("state 3: " + prevState.count); // 3
+    return {  count: prevState.count + 1 };
+  }, () => {
+    console.log('state 4: '+ this.state.count); // 4
+  });
+
+  this.setState({ count: this.state.count + 4 });
+  console.log("state 5: ", this.state.count);  // 0
+}
 ```
 
 [参考链接1](https://zhuanlan.zhihu.com/p/366781311)
+
