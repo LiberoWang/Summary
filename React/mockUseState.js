@@ -80,7 +80,7 @@ function dispatchAction(queue, action) {
 
 function App() {
   const [num, updateNum] = useState(0);
-  const [count, updateCount] = useState(1);
+  const [count, updateCount] = useState(10);
 
   console.log('num:', num);
   console.log('count:', count);
@@ -89,10 +89,16 @@ function App() {
     onClik() {
       updateNum(num => num + 1); // 某种机制会让组件重新render，并且更新num
     },
-    clickCount() {
-      updateCount(count => count + 5);
+    onFocus() {
+      updateCount(count => count + 10);
     }
   };
 }
 
 window.app = schedule(); // app变量主要是为了模拟浏览器点击
+
+
+// 运行该文件在chrome浏览器，可以执行一下输出结果
+
+app.onClik();
+app.onFocus();
