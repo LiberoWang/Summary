@@ -289,6 +289,170 @@ p1.then(value => {
 // 由于第一个then里面没有抛出Error，所有第二个then状态还是resolve
 ```
 
+
+
+### Promise
+
+```javascript
+  class Promise {
+     constructor(executor) {
+       this.state = 'pending';
+       this.reason = '';
+       this.value = '';
+
+       this.onResolveCallbacks = [];
+       this.onRejectedCallbacks = [];
+
+       const resolve = value => {
+         if (this.state === 'pending') {
+           this.state = 'fulfilled';
+           this.value = value;
+           this.onResolveCallbacks.forEach(fn => fn());
+         }
+       };
+
+       const reject = reason => {
+         if (this.state === 'pending') {
+            this.state = 'rejected';
+            this.reason = reason;
+            this.onRejectedCallbacks.forEach(fn => fn());
+         }
+       };
+
+       try {
+         executor(resolve, reject);
+       } catch (err) {
+         reject(err);
+       }
+     }
+
+    // then方法
+    then(onFulfilled, onRejected) {
+      if (this.state === 'fulfilled') {
+         onFulfilled(this.value);
+      }
+      if (this.state === 'rejected') {
+        onRejected(this.reason);
+      }
+      if (this.state === 'pending') {
+         this.onResolveCallbacks.push(() => onFulfilled(this.value));
+         this.onRejectedCallbacks.push(() => onRejected(this.reason));
+      }
+    }
+  }
+```
+
+
+
+### Promise.all
+
+`Promise.all`接收一个数组`[P1, P2, P3]`,每一个都是一个`Promise`的实例。(如果不是Promise实例, `Promise.all`会通过`Promise.resolve()包装成一个Promise对象`)返回的是一个Promise对象。当数组里面所有Promise实例的状态都为`fulfilled `时，调用then返回每一个实例的结果合成的数组，有一个失败返回的都是`reject `
+
+```javascript
+  // promises可以不是一个数组，是一个迭代器就行，迭代器就能进行遍历
+  Promise.all = function(promises) {
+    const res = [];
+    let count = 0;
+    return new Promise((resolve, reject) => {
+       // 可以用forEach循环的下标作为计数器，只有当用var引用的时候不能用下标，for循环，let声明i也可以作为计数器
+       promises.forEach(promise => {
+           //  Promise.resolve(promise)将promise实例包装成Promise对象，如果promise本来就是Promise对象，可直接promise.then
+           Promise.resolve(promise).then(data => {
+              // 使用下标赋而不是直接push是为了保证返回数组顺序和传入数组顺序一一对应
+              // Promise是异步的，可能第一个结果还没有返回，第二个返回了，push可能会导致顺序不一致
+              res[count] = data;
+              count++;
+              // 这里使用count计数器和传入的数组比较看处理完没有，而不是用res的长度和传入的promise进行比较
+              //  是因为Promise是异步返回的
+              if (count === promises.length) {
+                resolve(res);
+              }
+           }, reject)
+       })
+    })
+  }
+```
+示例
+```javascript
+const p1 = new Promise(resolve => resolve(1));
+const p2 = new Promise(resolve => resolve(2));
+const p3 = new Promise(resolve => resolve(3));
+
+Promise.all([p1, p2, p3]).then(data => console.log(data)); // [1, 2,3]
+```
+
+### Promise.allSettled
+
+```javascript
+  Promise.allSettled = function(promises) {
+    const result = [];
+    let count = 0;
+    return new Promise((resolve, reject) => {
+       promises.forEach(promise => {
+          Promise.resolve(promise).then(data => {
+             result[count] = data;
+             count++;
+             if (count === promises.length) {
+                 resolve(result);
+             }
+          }, (reason) => {
+             result[count] = data;
+             count++;
+             if (count === promises.length) {
+                resolve(result);
+             }
+          })
+       })
+    })
+  }
+```
+
+### Promise.race
+
+```javascript
+   Promise.race = function(promises) {
+     return new Promise((resolve, reject) => {
+       promises.forEach(promise => {
+           Promise.resolve(promise).then(data => resolve(data)).catch((error) => reject(error))
+       })
+     })
+   }
+```
+
+### Promise.resolve
+
+```javascript
+  Promise.resolve = function(val) {
+     return new Promise((resolve, reject) => {
+        resolve(val);
+     })
+  }
+```
+
+### Promise.reject 
+
+```javascript
+Promise.reject = function(val) {
+  return new Promise((resolve, reject) => {
+     reject(val);
+  })
+}
+```
+
+
+参考：
+
+[史上最全手写Promise](https://juejin.im/post/5b2f02cd5188252b937548ab)
+[45道Promise面试题](https://juejin.im/post/5e58c618e51d4526ed66b5cf)
+[手写Promise](https://github.com/xieranmaya/Promise3/blob/master/Promise3.js)
+[yck的Promise](https://juejin.im/post/6869573288478113799?utm_source=gold_browser_extension)
+
+
+关于Promise.then的：
+
+[Promise的then](https://www.zhihu.com/question/408642623/answer/1376646801)
+
+
 ### 参考链接
 
 0. https://juejin.cn/post/6844903625769091079

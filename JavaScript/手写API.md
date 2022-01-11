@@ -161,3 +161,171 @@ function instanceType(con) {
   return s.match(/\[object (.*?)\]/)[1].toLowerCase();
 }
 ```
+
+
+`call`, `apply`, `bind`是用来绑定`this`的指向
+
+### call
+
+语法： fun.call(thisArg, arg1, arg2, ...)
+
+demo1:
+
+```javascript
+  const Person = {
+    name: 'Tom',
+    say() {
+      console.log(this);
+      console.log(`我叫${this.name}`)
+    }
+  }
+
+ Person.say(); // 我叫Tom
+ 
+ const Person1 = { name: 'Jon' };
+ Person.say.call(Person1); // 我叫Jon
+```
+
+实现：
+
+```javascript
+Function.prototype.myCall = function(context) {
+  // context 就是我们传进来的Person1
+  context = context ? Object(context) : window;
+ // 给context添加一个方法fn指向调用myCall的say方法为this， myCall里面的this就是我们虚拟的say方法
+  context.fn = this; 
+  const args = [];
+  for(let i = 1, len = arguments.length; i < len; i ++ ) {
+    args.push('arguments[' + i + ']');
+  }
+  const result = eval('context.fn(' + args + ')');
+  delete context.fn;
+  return result;
+}
+```
+
+或者：
+
+```javascript
+Function.prototype.myCall = function(context) {
+   context = context ? Object(context) : window;
+   context.fn = this;
+   let args = [...arguments].slice(1);
+   let r = context.fn(args);
+   delete context.fn;
+   return r;
+}
+```
+
+### apply
+
+语法： `func.apply(thisArg, [argsArray])`
+
+实现：
+
+```javasctipt
+Function.prototype.myApply = function(context) {
+  context = context || window;
+    context.fn = this;
+    let args = [...arguments][1];
+    if (!args) {
+        return context.fn();
+    }
+    let r = context.fn(args);
+    delete context.fn;
+    return r;
+ }
+```
+
+### bind
+
+bind会创建一个新的函数。语法： `function.bind(thisArg, [arg1[, arg2[, ...]]])`
+
+例子：
+```javascript
+his.x = 9;    // 在浏览器中，this指向全局的 "window" 对象
+const module = {
+  x: 81,
+  getX: function() { return this.x; }
+};
+module.getX(); // 81
+const retrieveX = module.getX;
+retrieveX(); // 返回9 - 因为函数是在全局作用域中调用的
+
+const boundGetX = retrieveX.bind(module);  // 创建一个新函数，把 'this' 绑定到 module 对象
+boundGetX(); // 81
+```
+
+实现：
+
+```javascript
+  Function.prototype.myBind = function(context) {
+    const self = this; // 保存原函数
+    // 从bind函数的第二个参数到最后一个参数
+    const args = [].slice.call(argumnets, 1);
+    return function() {
+       const bindArgs = [].slice.call(arguments);
+       self.apply(context, args.concat(bindArgs));
+    }
+  }
+```
+
+### new
+
+语法： `const f1 = new Foo()`
+
+1.  f1是构造函数Foo的实例，`_proto_`指向构造函数的原型Foo.prototype
+2.  Foo.prototype.constructor指向构造函数Foo，Foo的prototype指向它的原型
+3.  Foo的原型的_proto_始终指向Object
+
+实现：
+
+```javascript
+// example1
+function newOperator(fn) {
+   const obj = new Object();
+   obj._proto_ = fn.prototype;
+   const args = [...arguments].slice(1);
+   const ret = fn.apply(obj, args);
+   return (ret instanceof Object) ? ret : obj;
+}
+
+// example2
+function newOperator(fn) {
+   newOperator.target = fn;
+   const obj = Object.create(fn.prototype);
+   const ret = fn.apply(obj, args);
+   return (ret instanceof Object) ? ret : obj;
+}
+
+// example3
+function newOperator() {
+   const obj = new Object();
+   const Constructor = [].shift.call(arguments);
+   const ret = Constructor.apply(obj, arguments);
+   return (ret instanceof Object) ? ret : obj;
+}
+```
+
+### instanceof
+
+`instanceof`的工作原理：在表达式` x instanceof Foo` 中，如果 `Foo` 的原型（即 `Foo.prototype`）出现在` x `的原型链中，则返回 `true`，不然，返回`false`
+
+```javascript
+function new_instance_of(leftValue, rightValue) {
+  // 取左表达式的__proto__值
+  const left = leftValue._proto_;
+  // 取右表达式的 prototype 值
+  const right = rightValue.prototype;
+
+  while(left) {
+    if (left === null) {
+      return false;
+    }
+    if (left === right) {
+       return true;
+    }
+    left = left._proto_;
+  }
+}
+```

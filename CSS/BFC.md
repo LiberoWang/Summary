@@ -32,6 +32,36 @@ BFC中的元素的布局是不受外界的影响, 是一个独立的渲染区域
 2. FFC 下的子元素不会继承父级容器的宽
 3. vertical-align 对 FFC 中的子元素是没有效果的
 
+
+### 概念
+BFC(Box Formatting context)：块级格式化上下文。Box是CSS布局的对象和基本单位，BFC就是页面上的一个隔离独立容器，容器的子元素不会影响到外面的元素。
+
+> 规则：
+
+- 内部的Box会垂直方向一个接一个的放置
+- 属于同一个BFC的两个相邻的Box的margin会重叠，不同的BFC就不会
+- 是页面上一个隔离的独立的容器，里面的元素不会影响到外面的元素
+- BFC的区域不会和float box重叠
+- 计算BFC的高度，浮动元素也参与计算
+
+### 触发的条件
+
+ - html的根元素
+ - 浮动元素,float不为none
+ - position为absolute或者fixed
+ - display的值为：`inline-block`, `table-cell`, `table-caption`, 或者是匿名表格元素
+ - overflow为scroll, hidden, auto
+ - 弹性元素, display为`flex`或者`inline-flex`
+ - 网格元素, display为`grid`或者`inline-grid`
+
+#### 应用场景
+
+- 清除内部浮动，触发父元素的BFC属性，会包含float元素
+- 分属于不同的BFC，可以阻止margin折叠
+- 阻止元素被浮动元素覆盖，各自是独立区域渲染
+- 自适应两栏布局
+
+
 ### 参考链接
 
 1. `https://mp.weixin.qq.com/s/8eAfz_I5xIhh7oFRifxaFw`

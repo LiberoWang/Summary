@@ -184,3 +184,161 @@ componentDidMount() {
 
 [参考链接1](https://zhuanlan.zhihu.com/p/366781311)
 
+
+****************************
+
+##### 一道题感受一下
+
+```
+  class Example extends React.Component {
+     constructor() {
+       super();
+       this.state = { val: 0 };
+     }
+
+     componentDidMount() {
+        this.setState({ val: this.state.val + 1 });
+        console.log(this.state.val);  // 第一次log
+
+        this.setState({ val: this.state.val + 1 });
+        console.log(this.state.val);  // 第二次log
+
+        setTimeout(() => {
+            this.setState({ val: this.state.val + 1 });
+            console.log(this.state.val);  // 第三次log
+           
+           this.setState({ val: this.state.val + 1 });
+           console.log(this.state.val);  // 第四次log
+        }, 0);
+     }
+
+     render() {
+        return null;
+     }
+  };
+```
+
+<img width="505" alt="截屏2020-08-12 下午5 54 20" src="https://user-images.githubusercontent.com/25894364/90002232-faf0b080-dcc4-11ea-997d-5d588b0d013a.png">
+
+我得到的答案是 **0,0,2,3**
+
+#### setState什么时候是同步的，什么时候是异步的？
+
+> 说法1:  由React控制的事件处理程序，以及生命周期函数调用的setState不会同步更新state.由React控制之外的事件中调用的setState是同步更新的。比如原生js绑定的事件，`addEventListener`, `setTimeout`, `setInterval`等事件。
+
+> 说法2：  react的setState本身并不是异步的，是因为批量处理机制给人一种异步的感觉：
+setState会表现出同步和异步的现象，但本质上是同步的，是其批量机制造成的一种假象。（在开发的过程中，在合成事件和生命周期函数里，完全可以视其为异步的）
+
+
+【React的更新机制】
+
+生命周期函数和合成事件中：
+
+  1.  无论调用多少次setState,都不会立即执行更新。而是将要更新的state存入`_pendingStateQuene`，将要更新的组件存入`dirtyComponent`;
+  2.  当跟组件didMount后，批量处理机制更新为false.此时再取出'_pendingStateQuene'和`dirtyComponent`中的state和组件进行合并更新；
+
+原生事件和异步代码中：
+
+  1.  原生事件不会触发react的批量处理机制，因而调用setState会直接更新；
+  2.  异步代码中调用setState，由于js的异步处理机制，异步代码会暂存，等待同步代码执行完毕仔执行，此时react的批量机制已经结束，因而直接更新。
+
+
+```javascript
+  // 假设 count = 0;
+  this.setState({ count: this.state.count + 1 });
+  this.setState({ count: this.state.count + 1 });
+  this.setState({ count: this.state.count + 1 });
+ // state.count === 1;
+```
+
+本质上是：
+
+```javascript
+  Object.assign(
+     state,
+    { count: state.count + 1 },
+    { count: state.count + 1 },
+    { count: state.count + 1 }
+  )
+// { count: 1 }
+```
+
+如果多次调用 setState 方法时传入的对象有相同的 key，那么最后一次调用时所传入的对象的那个 key 的值将成为最终的更新值，在最后一次调用前的值都将被覆盖。
+
+**解释：**
+
+在React的setState的函数实现中，会根据一个变量`isBatchingUpdate`来判断是直接同步更新this.state还是放到队列异步更新。React使用了事物机制，React的每个生命周期函数和合成事件都处在一个大的事务中。在事务的前置钩子中调用batchedUpdates方法修改isBatchingUpdates变量为true，在后置钩子中将变量设置为false.原生绑定事件和setTimeout异步的函数没有进入到React的事务中，或者当他们执行时，刚刚的事务已近结束，后置钩子触发了，所以此时的setState会直接进入非批量更新模式，表现在我们看来是同步执行了setState。
+
+
+```javasctipt
+  this.setState({ count: this.state.count + 1}, () => {
+     console.log(this.state.count); // 1
+  });
+```
+
+**解释：**
+
+该回调函数的执行时机是在于state合并处理之后。
+
+
+```javascript
+    // count: 0
+    this.setState({ count: this.state.count + 1 });
+    console.log("console: " + this.state.count);  // 0
+
+    this.setState({ count: this.state.count + 1 }, () => {
+      console.log("console from callback: " + this.state.count); // 2
+    });
+
+    this.setState(prevState => {
+      console.log('state count:', this.state.count); // 0
+      console.log("console from func: " + prevState.count); // 1
+      return {  count: prevState.count + 1 };
+    }, () => {
+      console.log('last console: '+ this.state.count)
+    });
+```
+
+执行结果：
+
+```javascript
+  console: 0 
+  state count: 0
+  console from func: 1 
+  console from callback: 2
+  last console: 2 
+
+```
+
+React其实会维护一个state的更新队列，每次调用setState都会先把当前修改的state推进这个队列，在最后，React会对这个队列进行合并处理，然后去执行回调函数。根据最终的合并结果再去走下面的流程。
+
+#### setState的第二种形式
+
+`setState(nextState, callback)`：`nextState`会浅合并到当前state中，这是在事件处理函数和服务器请求回调函数中触发UI更新方法。不保证`setState`调用会同步执行，考虑性能问题会对多次调用批量处理。
+
+也可以传递一个签名为`function(state, props) => newState`的函数作为参数。这会将一个原子性的更新操作价格更新队列，在设置任何值之前，此操作会查询前一刻的state和props. `...setState()`并不会立即改变this.state,而是会创建一个待执行的变动。调用此方法后访问this.state有可能会得到当前已存在的state。(指state尚未来得及改变)。
+
+```javascript
+  // 正确用法
+  this.setState((preState, props) => ({
+      count: preState.count + props.increment
+  }));
+```
+
+这种函数是setState工作机制类似：
+
+```javascript
+  [
+    { inrement: 1},
+    { inrement: 1},
+    { inrement: 1},
+  ].reduce((prevState, props) => ({
+    count: preState.count + props.inrement
+  }), { count: 0 })
+```
+setState更新机制：
+
+![image](https://user-images.githubusercontent.com/25894364/121316295-c036c380-c93b-11eb-88c2-3f239aba241b.png)
+
+[参考链接1](https://juejin.cn/post/6844904015524790279)
+[参考链接2](https://juejin.cn/post/6844903730035294216)
