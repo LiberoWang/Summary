@@ -34,6 +34,7 @@ import {HashHistory, Link} from 'react-router-dom';
 如果移动的位置超出了访问历史的边界，这三个方法不会报错，而是默默的失败。
 
 HTML5新方法：添加和替换历史记录的条目
+只支持http(s)协议，不支持本地协议(files:///home)
 
 `pushState`: `history.pushState(state, title, url);`
    `state`: 一个与指定网页相关的状态对象， `popstate`事件触发时，该对象会传入回调函数，如果不需要这个对象，此处可以填null.
@@ -61,6 +62,20 @@ HTML5新方法：添加和替换历史记录的条目
       console.log('location' + document.location);
       console.log('state' + JSON.stringify(event.state));
    });
+
+   window.onpopstate = function(event) {
+  alert("location: " + document.location + ", state: " + JSON.stringify(event.state));
+};
+
+// 实践
+//绑定事件处理函数. 
+history.pushState({page: 1}, "title 1", "?page=1");    //添加并激活一个历史记录条目 http://example.com/example.html?page=1,条目索引为1
+history.pushState({page: 2}, "title 2", "?page=2");    //添加并激活一个历史记录条目 http://example.com/example.html?page=2,条目索引为2
+history.replaceState({page: 3}, "title 3", "?page=3"); //修改当前激活的历史记录条目 http://ex..?page=2 变为 http://ex..?page=3,条目索引为3
+history.back(); // 弹出 "location: http://example.com/example.html?page=1, state: {"page":1}"
+history.back(); // 弹出 "location: http://example.com/example.html, state: null
+history.go(2);  // 弹出 "location: http://example.com/example.html?page=3, state: {"page":3}
+
 ```
 `hashChange`：监听hash的变化，作出相应的操作，通过浏览器的前进后退，a标签，location这种情况改变url的hash都会触发hashchange。
 ```javascript
@@ -152,5 +167,9 @@ Link组件主要做的是，拿到prop,传进来的to,通过`PushState()`改变�
 参考：
 
 [react-router v4源码分析](https://github.com/fi3ework/blog/issues/21)
+
 [前端路由和react-router实现详解](https://juejin.im/post/6844904094772002823)
+
 [pushState与replaceState](https://juejin.im/post/6844903558576341000)
+
+[彻底搞懂react-router](https://juejin.cn/post/6886290490640039943)
