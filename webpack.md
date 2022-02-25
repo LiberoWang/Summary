@@ -22,7 +22,11 @@ models.export = {
     alias, // 别名
   }
   optimization: {  // 优化配置项
-    splitChunks, // 提取公共模块
+    runtimeChunk, // 会为入口添加一个只含有 runtime 的额外 chunk
+    // 👇 提取公共模块 参考：https://webpack.docschina.org/plugins/split-chunks-plugin/
+    splitChunks: { 
+      cacheGroups, // 缓存组
+    }, 
   },
 
 }
@@ -116,6 +120,7 @@ export default {
 
 ```js
   plugins: [
+    // 👇 允许你创建可在编译时配置的全局常量
     new DefinePlugin({
       "process.env.NODE_ENV": JSON.stringify("development") // DLL模式下覆盖生产环境成开发环境(启动第三方依赖调试模式)
     }),
@@ -158,9 +163,9 @@ BundleAnalyzerPlugin可以可视化找出体积过大原因
 
 ```js
   optimization: {
-    runtimeChunk: { name: "manifest" }, // 抽离WebpackRuntime函数
+    runtimeChunk: 'single' || { name: "manifest" }, // 抽离WebpackRuntime函数
     splitChunks: {
-      cacheGroups: {
+      cacheGroups: { // 缓存分组
         common: {
             minChunks: 2,
             name: "common",
