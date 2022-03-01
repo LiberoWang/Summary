@@ -223,7 +223,7 @@ Function.prototype.myCall = function(context) {
 
 实现：
 
-```javasctipt
+```js
 Function.prototype.myApply = function(context) {
   context = context || window;
     context.fn = this;

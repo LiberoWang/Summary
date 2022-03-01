@@ -1,3 +1,8 @@
+### GET 与 POST的区别
+
+
+[GET和POST的区别](https://github.com/febobo/web-interview/issues/145)
+
 ### 同源策略
 - 协议相同
 - 郁闷相同
@@ -30,7 +35,7 @@
 > 简单请求
 
  - 请求方法是: GET、POST、HEADE
- - HTTP消息头不超过一下字段：
+ - HTTP消息头不超过以下字段：
 
  Accept
  Accept-Language

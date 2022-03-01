@@ -301,6 +301,7 @@ Promise.prototype.all = function(promises) {
 ```
 返回最先完成的状态(resolve或者rejected)
 ```
+
 Promise.prototype.race = function(promises) {
   return new Promise((resolve, reject) => {
     promises.forEach(promise => {
