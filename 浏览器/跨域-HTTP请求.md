@@ -1,6 +1,5 @@
 ### GET 与 POST的区别
 
-
 [GET和POST的区别](https://github.com/febobo/web-interview/issues/145)
 
 ### 同源策略
@@ -83,7 +82,7 @@ JSONP方式跨域，会不受同源正常的影响，并且携带跨域域名的
 
 #### document.domain
 
-该形式只能访问二级域名相同的，比如`a.test.com`和`b.test.com`，只要给两个页面添加`document.domai n= test.com`通过`a.test.com`创建一个`iframe`去控制`iframe`的`window`进行交互。
+该形式只能访问二级域名相同的，比如`a.test.com`和`b.test.com`，只要给两个页面添加`document.domai n= test.com`，通过`a.test.com`创建一个`iframe`去控制`iframe`的`window`进行交互。
 
 #### postMessage
 

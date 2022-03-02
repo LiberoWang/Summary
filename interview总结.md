@@ -10,15 +10,20 @@
 3. cookie的属性
 4. 浏览器缓存
 5. requsetAnimationFrame
+6. 渲染流程
+   [渲染流程](https://segmentfault.com/a/1190000014520786)
 
 #### 框架
 
   1. React的生命周期
   2. React组件之间的通信
-  3. useState的参数(普通值和回调函数)
+  3. useState的参数(普通值和回调函数，回调函数是惰性函数)
   4. dva的`connect`和react-redux的`connect`
+      高阶组件：connect把React组件和redux的store真正连接起来
   5. 受控组件和非受控组件
+      受控组件：表单元素数据自己控制； 非受控组件：表单数据就由`DOM`本身处理
   6. 高阶组件
+     高阶组件就是一个函数，传给它一个组件，它返回一个新的组件
   7. React事件机制
   8. usecallback和useMemo
 
@@ -128,6 +133,12 @@
 
 ![image](https://user-images.githubusercontent.com/25894364/156202732-e4259df6-b4e4-4f40-bf8f-6f7af5a7ae62.png)
 
+[JSON.stringify()的问题](https://segmentfault.com/q/1010000040622953)
+
+9. 闭包(JS垃圾回收机制)
+
+[V8引擎的垃圾回收](https://juejin.cn/post/6844904016325902344)
+
 #### CSS
 
 1. 伪类和伪元素
@@ -137,7 +148,11 @@
 5. position
 6. 重绘和重排
 7. sass,less和css的区别
-
+8. 开启css硬件加速 - GPU 加速
+   - `transform: translateZ(0)`
+   - `transform: translate3d(0, 0, 0)`
+   - `will-change: transform` // 创建新的渲染层
+   - `filter`
 
 #### 构建
 
