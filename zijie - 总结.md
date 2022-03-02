@@ -1,6 +1,7 @@
 1. 受控组件与非受控组件
 
 // React官网
+
 [受控组件](https://zh-hans.reactjs.org/docs/forms.html#controlled-components)
 
 简单说，在HTML表单元素中，他们通常自己维护一套的‘state’，并随着用户的输入，自行的在UI上更新，这种行为是不被我们所控制的。如果将`React`中的`state`属性和表单元素的值建立依赖关系，再通过`onChange`和`setState`事件更新`state`属性，能达到控制用户输入过程中表单值的改变，被React以这种方式控制取值的叫做`受控组件`.
@@ -90,6 +91,8 @@ import { createStore, applyMiddleware } from 'redux';
 ```
 
 // connect函数 -- 连接React组件与Redux store -> 返回一个新的已与 Redux store 连接的组件类.
+
+是一个高阶函数
 
 ```js
 connect([mapStateToProps], [mapDispatchToProps], [mergeProps], [options])

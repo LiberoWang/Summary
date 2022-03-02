@@ -322,6 +322,156 @@ setTimeout(function() {
 参考：
 
 [这一次，彻底弄懂JavaScript执行机制](https://juejin.im/post/6844903512845860872)
+
 [Event Loop的规范和实现](https://zhuanlan.zhihu.com/p/33087629)
+
 [说说事件循环机制](https://juejin.im/post/6844904079353708557?utm_source=gold_browser_extension)
+
 [前端中的事件循环eventloop机制](https://juejin.im/post/6844904035770695693)
+
+> 关键词：
+
+0. 起因(缘由)
+1. 任务机制(宏任务/微任务)
+
+
+> 问题
+
+1. 为什么会有事件循环机制
+
+`单线程`， `同步阻塞`
+
+因为JS是单线程，会阻塞后面的进程，于是出现了`异步任务`（回调函数）
+
+主线程需要频繁的和多个线程协调任务、调度任务，于是`浏览器`又进一步引入了事件循环(EventLoop)的机制，来协调多个线程多个事件之间的工作。
+
+
+这里首先要明确一点：浏览器是一个进程，其有多个线程
+
+```
+一般情况下, 浏览器有如下五个线程:
+
+GUI 渲染线程
+JavaScript 引擎线程
+浏览器事件触发线程
+定时器触发线程
+异步 HTTP 请求线程
+```
+
+2. 任务机制
+
+宏任务：诸如 整个script、各种事件回调（dom 事件、I/O）、setTimeout、setInterval 等任务。
+微任务：诸如 Promise.[then/finally/catch]、MutationObserver (dom变化监听/前端回溯) 等任务。
+
+3. 为什么要引入微任务
+
+关键词：事件循环机制中任务的`优先级、时效性`
+
+4. 执行流程
+
+[精简版]： 调用栈为空 -> 执行宏任务队列中最早的一个宏任务 x -> 执行 x 关联的微任务队列中的所有微任务 -> 调用栈为空 -> .... (重复如上动作) 这样重复的轮询机制，被称之为事件循环。
+
+
+```js
+console.log('script start');
+
+async function async1() {
+  await async2()
+  console.log('async1 end');
+}
+
+async function async2() {
+  await async3()
+  console.log('async2 end');
+}
+
+async function async3() {
+  console.log('async3 end');
+}
+
+async function Myasync1() {
+  await Myasync2()
+  console.log('Myasync1 end');
+}
+
+async function Myasync2() {
+  await Myasync3()
+  console.log('Myasync2 end');
+}
+
+async function Myasync3() {
+  console.log('Myasync3 end');
+}
+
+async1()
+Myasync1()
+
+setTimeout(function() {
+  console.log('setTimeout');
+}, 0)
+
+new Promise(resolve => {
+  console.log('Promise');
+  resolve()
+})
+  .then(function() {
+    console.log('promise1');
+  })
+  .then(function() {
+    console.log('promise2');
+  })
+
+console.log('script end');
+```
+
+![9e1e40c59f6971f6bcbec71c0a4e8404.png](evernotecid://6E2F0541-5EBF-450A-A78B-AACE4C6306D5/appyinxiangcom/16628798/ENResource/p192)
+
+
+```js
+new Promise(resolve => {                  // 1
+  setTimeout(()=>{                        // 2
+      console.log(666);                   // 3
+      new Promise(resolve => {            // 4
+        resolve();                        // 5      
+      })                                  // 6       
+      .then(() => {console.log(777);})    // 7
+  })                                      // 8       
+  resolve();                              // 9
+ })                                       // 10
+ .then(() => {                            // 11
+	     new Promise(resolve => {         // 12
+	       resolve();                     // 13
+	     })                               // 14
+	     .then(() => {console.log(111);}) // 15
+	     .then(() => {console.log(222);});// 16
+ })                                       // 17
+ .then(() => {                            // 18
+	     new Promise((resolve) => {       // 19
+	       resolve()                      // 20
+	     })                               // 21
+	    .then(() => {                     // 22
+		     new Promise((resolve) => {   // 23
+		       resolve()                  // 24
+		     })                           // 25
+		    .then(() => {console.log(444)})// 26
+	     })                                // 27
+	    .then(() => {                      // 28
+	       console.log(555);               // 29
+	    })                                 // 30
+})                                         // 31
+.then(() => {                              // 32
+  console.log(333);                        // 33
+})                                         // 34
+
+```
+
+[参考链接](https://juejin.cn/post/6977998218315431967)
+
+[参考链接](https://juejin.cn/post/6856324679951450120)
+
+[参考链接](https://juejin.cn/post/6856324679951450120)
+
+[浏览器进程、JS事件循环机制、宏任务和微任务](https://juejin.cn/post/6856324679951450120#heading-0)
+
+
+
