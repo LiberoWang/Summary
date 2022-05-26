@@ -11,6 +11,16 @@
 
 ![images](https://static001.geekbang.org/resource/image/a4/93/a4089b1acf12d52575ebfc89dd6b7593.png)
 
+> React Hooks的好处
+ 
+  - 相比较于高阶组件，更容易代码复用 -可自定义Hooks
+  - 代码量更少
+  - 好的代码结构
+  - 生命周期淡化
+  - 不考虑`this`的问题
+  
+  但是Hooks不擅长处理异步的代码(必包引起的旧的引用的问题)
+
 ### 基础
 
 `React`核心原理：**当数据发生变化时，UI能够自动把变化反映出来。**

@@ -149,6 +149,30 @@ const memoizedCallback = useCallback(() => {
   const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);
 ```
 
+useCallback和useMemo
+
+`useCallback`和`useMemo`是React内置的用于性能优化的hooks。
+
+`useCallback`返回的是一个缓存的函数；`useMemo`返回的是一个缓存的结果.
+
+`useCallback(fn, inputs) === useMemo(() => fn, inputs))`
+
+fn 能不受闭包限制，访问到这个函数式组件内部最新的状态
+
+问题：
+- 为什么要使用`useCallback`和`useMemo`
+- 什么时候要使用`useCallback`和`useMemo`
+
+// when?
+- 引用相等
+- 昂贵的计算
+
+[什么时候用useCallback和useMemo](https://jancat.github.io/post/2019/translation-usememo-and-usecallback/)
+
+[useCallback](https://zhuanlan.zhihu.com/p/56975681)
+
+[React useCallback源码](https://github.com/facebook/react/blob/0e100ed00fb52cfd107db1d1081ef18fe4b9167f/packages/react-server/src/ReactFizzHooks.js#L445)
+
 #### 关于React的性能优化
 
 1. 使用React.memo来缓存组件
